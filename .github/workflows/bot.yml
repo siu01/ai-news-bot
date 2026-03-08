@@ -47,18 +47,19 @@ jobs:
         
         rss:
           google_news_ai_url: "https://news.google.com/rss/search?q=AI+artificial+intelligence&hl=en&gl=US&ceid=US:en"
-          max_articles: 5
+          google_news_ai_jp_url: "https://news.google.com/rss/search?q=AI+人工知能&hl=ja&gl=JP&ceid=JP:ja"
+          max_articles: 10
         
         bot:
           max_summary_length: 280
           log_file: "posted_urls.log"
         EOF
         
-        python main.py
+        python main_enhanced.py
     
     - name: Upload log file
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: bot-logs
         path: |
