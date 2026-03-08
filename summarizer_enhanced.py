@@ -53,10 +53,17 @@ Content: {content[:1500]}
             
         except Exception as e:
             print(f"Error summarizing article: {e}")
-            if language == 'ja':
-                return f"【AIニュース】{title[:50]}... #AI"
-            else:
-                return f"【AI News】{title[:50]}... #AI"
+            # Fallback to dummy summary when API fails
+            return self._create_dummy_summary(title, language)
+    
+    def _create_dummy_summary(self, title, language):
+        """Create a dummy summary when API fails"""
+        if language == 'ja':
+            summary = f"・{title[:30]}...\n・AI関連の重要な更新\n・影響が期待される\n感想：興味深いニュースです #AI"
+        else:
+            summary = f"• {title[:30]}...\n• Important AI update\n• Impact expected\nThought: Interesting news #AI"
+        
+        return self._format_summary(summary, language)
     
     def _format_summary(self, summary, language):
         """Format summary to fit Twitter character limit"""
