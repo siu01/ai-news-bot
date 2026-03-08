@@ -1,0 +1,67 @@
+name: AI News Bot
+
+on:
+  schedule:
+    # Run every hour at minute 0
+    - cron: '0 * * * *'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Run AI News Bot
+      env:
+        X_API_KEY: ${{ secrets.X_API_KEY }}
+        X_API_SECRET: ${{ secrets.X_API_SECRET }}
+        X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+        X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+        X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+        GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      run: |
+        # Create config file from environment variables
+        cat > config.yaml << EOF
+        x_api:
+          api_key: "${X_API_KEY}"
+          api_secret: "${X_API_SECRET}"
+          access_token: "${X_ACCESS_TOKEN}"
+          access_token_secret: "${X_ACCESS_TOKEN_SECRET}"
+          bearer_token: "${X_BEARER_TOKEN}"
+        
+        groq_api:
+          api_key: "${GROQ_API_KEY}"
+        
+        rss:
+          google_news_ai_url: "https://news.google.com/rss/search?q=AI+artificial+intelligence&hl=en&gl=US&ceid=US:en"
+          max_articles: 5
+        
+        bot:
+          max_summary_length: 280
+          log_file: "posted_urls.log"
+        EOF
+        
+        python main.py
+    
+    - name: Upload log file
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: bot-logs
+        path: |
+          bot.log
+          posted_urls.log
+        retention-days: 30
